@@ -1,0 +1,71 @@
+-- Comments
+
+--tag1
+--    Escaped QText
+--    #RepQText
+--    "raw regex" -> tag2
+--    "raw regex", guard -> tag3
+--    REST -> tag4
+--    varname <- value
+-- first definitions of value must be annotated !bool or !num to be evaluated,
+-- else they are strings.
+
+-- in general, if not previously encountered, a type annotation forces evaluation
+-- if not previously encountered and no type annotation, is treated as a string
+-- if previously encountered and type annotation is new, changes type
+-- if previously encountered and type annotation is same, continues evaluating
+-- if previously encountered and no type annotation, takes type cue from previous value
+
+-- strings are always the most versatile {boolean @True|False} evaluates to
+-- the string True or the string False, and {expression} evaluates to the number
+-- as a string. type annotations are more a nicety to ensure some values
+-- will always be ground literals
+
+-- extra newline necessary
+
+--start
+--    Hi{$namedef$@ $name$, nice to see you again.|! What's your name?} 
+--    # Sorry whut.
+--    "^[a-z]+$" -> start
+--    $name$ <- $lm$
+--    $namedef$ <- True
+
+
+start
+    Hi! Please enter your name:
+    "^[a-z]+$" -> opening
+    $name$ <- $lm$
+    # Hmm, that's not a name... please enter your name:
+
+
+opening
+    Welcome to Lost in Paris, a text game by Dianthe Basak.
+    REST -> stats
+    $euro$ <- 5
+    $courant$ <- !bool False
+    $gostat$ <- !num 1
+
+
+stats
+    You, $name$, are lost in Paris. You have $euro$ euros to your name, no prospects, and {$courant$@some|little to no} french under your belt. You're here for the {{$gostat$-1}@first|second|third|$gostat$th} time.
+    ".*", $courant$ -> endaux
+    ".*", not $courant$ -> meet
+    $gostat$ <- $gostat$+1
+
+
+meet
+    You see a frenchman. Do you want to learn french?
+    "^[yY]|^yes" -> learn
+    "^[nN]|^no" -> stats
+
+learn
+    He teaches you french!
+    REST -> stats
+    $courant$ <- not $courant$
+
+endaux
+    Thank you for playing, $name$.
+    REST -> end
+    $call$ <- plates
+
+
